@@ -1,1 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>English With Emily - AI Video Maker</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    color: #222;
+}
+
+header {
+    background: #222;
+    color: white;
+    padding: 22px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+header p {
+    margin: 8px 0 0;
+    color: #ccc;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.characters {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.character {
+    flex: 1;
+    min-width: 250px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.character h3 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+select,
+textarea,
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 220px;
+    resize: vertical;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 8px;
+    background: #222;
+    color: white;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #444;
+}
+
+.preview {
+    min-height: 250px;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+
+.status {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 7px;
+    background: #f0f0f0;
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>English With Emily</h1>
+    <p>AI Two-Character Video Maker</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>👩 Character 1 — Emily</h2>
+
+        <label>Character</label>
+        <select id="character1">
+            <option>Emily</option>
+        </select>
+
+        <label>Voice</label>
+        <select id="voice1">
+            <option>Female English Voice</option>
+            <option>Female - Slow English</option>
+            <option>Female - Natural English</option>
+        </select>
+    </div>
+
+    <div class="card">
+        <h2>👨 Character 2 — David</h2>
+
+        <label>Character</label>
+        <select id="character2">
+            <option>David</option>
+        </select>
+
+        <label>Voice</label>
+        <select id="voice2">
+            <option>Male English Voice</option>
+            <option>Male - Slow English</option>
+            <option>Male - Natural English</option>
+        </select>
+    </div>
+
+    <div class="card">
+        <h2>📝 Video Script</h2>
+
+        <p>
+            Write the conversation like this:
+        </p>
+
+        <textarea id="script">Emily: Good morning, David. How are you today?
+
+David: Good morning, Emily. I'm doing great. How about you?
+
+Emily: I'm very good. Today we are going to practice simple English.
+
+David: That sounds great. Let's begin!</textarea>
+
+        <label>Caption Style</label>
+        <select id="captionStyle">
+            <option>Large Easy English</option>
+            <option>Normal Captions</option>
+            <option>Bold Learning Captions</option>
+        </select>
+
+        <label>Video Format</label>
+        <select id="format">
+            <option>16:9 YouTube</option>
+            <option>9:16 YouTube Shorts</option>
+            <option>1:1 Square</option>
+        </select>
+
+        <button onclick="generateVideo()">
+            🎬 Generate AI Video
+        </button>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <div class="card">
+        <h2>🎥 Video Preview</h2>
+
+        <div class="preview" id="preview">
+            Your generated video will appear here.
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+function generateVideo() {
+
+    const script = document.getElementById("script").value;
+    const status = document.getElementById("status");
+    const preview = document.getElementById("preview");
+
+    if (script.trim() === "") {
+        alert("Please enter a script first.");
+        return;
+    }
+
+    status.style.display = "block";
+    status.innerHTML = "⏳ Preparing your AI video...";
+
+    preview.innerHTML = `
+        <div>
+            <h2>🎬 Video Project Ready</h2>
+            <p>Your script has been received.</p>
+            <p>Next we will connect:</p>
+            <p>🎙️ AI Voice → 👄 Lip Sync → 💬 Captions → 🎥 Video</p>
+        </div>
+    `;
+
+    setTimeout(function() {
+        status.innerHTML =
+            "✅ Prototype working! AI generation will be connected in the next stage.";
+    }, 1200);
+}
+
+</script>
+
+</body>
+</html>
