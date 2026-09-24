@@ -6,7 +6,7 @@
 # JSON: {"script":"Emily: ...\nDavid: ...","mode":"Normal English","captionStyle":"highlight","format":"16:9 YouTube"}
 # Returns an MP4 video.
 
-import os, re, json, uuid, subprocess, tempfile, shutil, threading, traceback
+import os, re, json, uuid, hashlib, subprocess, tempfile, shutil, threading, traceback
 from pathlib import Path
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
@@ -19,6 +19,13 @@ EMILY_IMG="/content/emily.jpg"
 DAVID_IMG="/content/david.jpg"
 OUT=Path("/content/english_with_emily_jobs")
 OUT.mkdir(exist_ok=True)
+
+# Persistent recovery storage. If Google Drive is mounted, completed segments
+# are copied there immediately so a Colab runtime disconnect does not erase them.
+DRIVE_ROOT=Path("/content/drive/MyDrive/EnglishWithEmily_Recovery")
+if DRIVE_ROOT.parent.exists():
+    DRIVE_ROOT.mkdir(parents=True,exist_ok=True)
+
 JOBS={}
 
 app=Flask(__name__)
@@ -159,6 +166,8 @@ def run_job(job_id, script, mode, style, fmt):
             if m: lines.append((m.group(1).title(),m.group(2).strip()))
         if not lines: raise RuntimeError("Use lines beginning with Emily: or David:")
         job=OUT/job_id; job.mkdir(parents=True,exist_ok=True)
+        recovery=DRIVE_ROOT/job_id if DRIVE_ROOT.parent.exists() else None
+        if recovery: recovery.mkdir(parents=True,exist_ok=True)
         JOBS[job_id].update(status="processing",progress=0,message="Starting video generation...")
         clips=[]; entries=[]; cursor=0.0
         speed=0.78 if mode=="Slow English" else (0.72 if mode=="Beginner Friendly" else 1.0)
@@ -170,7 +179,14 @@ def run_job(job_id, script, mode, style, fmt):
             lipdir=job/f"lip_{n}"
             active=make_lipsync(audio,EMILY_IMG if speaker=="Emily" else DAVID_IMG,lipdir)
             seg=job/f"segment_{n}.mp4"
-            make_segment(active,DAVID_IMG if speaker=="Emily" else EMILY_IMG,audio,speaker,seg)
+            cached = recovery/f"segment_{n}.mp4" if recovery else None
+            if cached and cached.exists():
+                shutil.copy2(cached,seg)
+                JOBS[job_id].update(message=f"Recovered {speaker} segment {n}/{len(lines)}...")
+            else:
+                make_segment(active,DAVID_IMG if speaker=="Emily" else EMILY_IMG,audio,speaker,seg)
+                if cached:
+                    shutil.copy2(seg,cached)
             d=duration(seg); clips.append(seg)
             entries.append({"start":cursor,"end":cursor+d,"text":text,"speaker":speaker})
             cursor+=d+pause
@@ -179,6 +195,9 @@ def run_job(job_id, script, mode, style, fmt):
         joined=job/"joined.mp4"
         run(["ffmpeg","-y","-f","concat","-safe","0","-i",str(concat),"-c:v","libx264","-preset","veryfast","-crf","19","-c:a","aac","-b:a","160k",str(joined)])
         final=job/"English_With_Emily.mp4"; add_captions(joined,entries,style,final)
+        if recovery:
+            shutil.copy2(final,recovery/"English_With_Emily.mp4")
+            (recovery/"completed.txt").write_text("Video completed successfully.",encoding="utf-8")
         JOBS[job_id].update(status="done",progress=100,message="Video ready.",file=str(final))
     except Exception as e:
         JOBS[job_id].update(status="error",progress=0,message=str(e),trace=traceback.format_exc())
@@ -190,7 +209,12 @@ def generate():
     if not script: return jsonify({"error":"Script is empty"}),400
     lines=[raw for raw in script.splitlines() if re.match(r"^\s*(Emily|David)\s*:\s*.+$",raw,re.I)]
     if not lines: return jsonify({"error":"Use lines beginning with Emily: or David:"}),400
-    job_id=uuid.uuid4().hex
+    # Deterministic job ID lets the same script/settings resume from Drive
+    # after a Colab disconnect instead of starting a completely new job.
+    key=f"{script}\n{mode}\n{style}\n{fmt}".encode("utf-8")
+    job_id=hashlib.sha256(key).hexdigest()[:24]
+    if job_id in JOBS and JOBS[job_id].get("status") in ("queued","processing"):
+        return jsonify({"job_id":job_id,"status_url":f"/status/{job_id}"}),202
     JOBS[job_id]={"status":"queued","progress":0,"message":"Queued..."}
     threading.Thread(target=run_job,args=(job_id,script,mode,style,fmt),daemon=True).start()
     return jsonify({"job_id":job_id,"status_url":f"/status/{job_id}"}),202
