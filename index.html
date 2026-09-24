@@ -76,7 +76,7 @@ David: That sounds great. Let's begin!</textarea>
 <div class="card">
 <h2>🎥 Podcast Preview</h2>
 <p class="hint">Both speakers stay visible. The active speaker is emphasized and the full sentence stays on screen while the spoken word is highlighted.</p>
-<div class="podcast">
+<div id="preview" class="podcast">
 <div class="speaker left active"><div class="avatar">👩🏻</div><div class="name">Emily</div><div class="role">English Teacher</div><div id="emilyCaption" class="caption">Good morning, <span class="highlight">David</span>. How are you today?</div></div>
 <div class="speaker right"><div class="avatar">👨🏻</div><div class="name">David</div><div class="role">English Learner</div><div id="davidCaption" class="caption clean">I'm doing great. How about you?</div></div>
 </div>
@@ -95,7 +95,7 @@ async function generateVideo(){
  const script=document.getElementById('script').value.trim();
  const status=document.getElementById('status');
  const preview=document.getElementById('preview');
- const api=(document.getElementById('apiUrl').value||'').trim().replace(/\\/$/,'');
+ const api=(document.getElementById('apiUrl').value||'').trim().replace(/\/$/,'');
  if(!script){alert('Please enter a script first.');return}
  if(!api){alert('First paste your Colab Generator URL.');return}
  status.style.display='block';
