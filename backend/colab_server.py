@@ -21,7 +21,19 @@ OUT=Path("/content/english_with_emily_jobs")
 OUT.mkdir(exist_ok=True)
 
 app=Flask(__name__)
-CORS(app, resources={r"/*":{"origins":"*"}})
+CORS(app, resources={r"/*":{"origins":"*"}}, methods=["GET","POST","OPTIONS"], allow_headers=["Content-Type","Authorization"], supports_credentials=False)
+
+@app.after_request
+def add_cors_headers(response):
+    # Explicit headers keep browser requests working through temporary Colab tunnels.
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
+
+@app.route("/generate", methods=["OPTIONS"])
+def generate_options():
+    return ("", 204)
 
 def run(cmd):
     p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
