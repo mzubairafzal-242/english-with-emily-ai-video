@@ -125,8 +125,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 text=(before+" " if before else "")+"{\\c"+accent+"}"+w+"{\\c"+primary+"}"+(" "+after if after else "")
             else:
                 text=shown
-            lines.append(f"Dialogue: 0,{ts(start)},{ts(end)},Default,,0,0,0,,{text}")
-            break
+            alignment = 1 if e["speaker"]=="Emily" else 3
+            # Keep the whole sentence visible for the full sentence duration while the active word changes.
+            lines.append(f"Dialogue: 0,{ts(a)},{ts(b)},Default,,0,0,0,,{{\\an{alignment}}}{text}")
     ass.write_text("\n".join(lines),encoding="utf-8")
     run(["ffmpeg","-y","-i",str(video),"-vf",f"ass={ass}","-c:v","libx264","-preset","veryfast","-crf","19","-c:a","copy",str(out)])
     ass.unlink(missing_ok=True)
