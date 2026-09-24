@@ -6,7 +6,7 @@
 # JSON: {"script":"Emily: ...\nDavid: ...","mode":"Normal English","captionStyle":"highlight","format":"16:9 YouTube"}
 # Returns an MP4 video.
 
-import os, re, json, uuid, subprocess, tempfile, shutil
+import os, re, json, uuid, subprocess, tempfile, shutil, threading, traceback
 from pathlib import Path
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
@@ -19,6 +19,7 @@ EMILY_IMG="/content/emily.jpg"
 DAVID_IMG="/content/david.jpg"
 OUT=Path("/content/english_with_emily_jobs")
 OUT.mkdir(exist_ok=True)
+JOBS={}
 
 app=Flask(__name__)
 CORS(app, resources={r"/*":{"origins":"*"}}, methods=["GET","POST","OPTIONS"], allow_headers=["Content-Type","Authorization"], supports_credentials=False)
@@ -149,50 +150,63 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 def health():
     return jsonify({"ok":True,"service":"English With Emily generator"})
 
-@app.post("/generate")
-def generate():
-    data=request.get_json(force=True)
-    script=data.get("script","").strip()
-    mode=data.get("mode","Normal English")
-    style=data.get("captionStyle","highlight")
-    if not script:
-        return jsonify({"error":"Script is empty"}),400
-    lines=[]
-    for raw in script.splitlines():
-        raw=raw.strip()
-        m=re.match(r"^(Emily|David)\s*:\s*(.+)$",raw,re.I)
-        if m: lines.append((m.group(1).title(),m.group(2).strip()))
-    if not lines:
-        return jsonify({"error":"Use lines beginning with Emily: or David:"}),400
-
-    job=OUT/uuid.uuid4().hex
-    job.mkdir()
-    clips=[]; entries=[]; cursor=0.0
-    speed=0.78 if mode=="Slow English" else (0.72 if mode=="Beginner Friendly" else 1.0)
-    pause=0.35 if mode=="Normal English" else 0.65
+def run_job(job_id, script, mode, style, fmt):
     try:
+        lines=[]
+        for raw in script.splitlines():
+            raw=raw.strip()
+            m=re.match(r"^(Emily|David)\\s*:\\s*(.+)$",raw,re.I)
+            if m: lines.append((m.group(1).title(),m.group(2).strip()))
+        if not lines: raise RuntimeError("Use lines beginning with Emily: or David:")
+        job=OUT/job_id; job.mkdir(parents=True,exist_ok=True)
+        JOBS[job_id].update(status="processing",progress=0,message="Starting video generation...")
+        clips=[]; entries=[]; cursor=0.0
+        speed=0.78 if mode=="Slow English" else (0.72 if mode=="Beginner Friendly" else 1.0)
+        pause=0.35 if mode=="Normal English" else 0.65
         for n,(speaker,text) in enumerate(lines,1):
-            audio=job/f"audio_{n}.wav"
-            voice="af_heart" if speaker=="Emily" else "am_michael"
+            JOBS[job_id].update(progress=int((n-1)/len(lines)*85),message=f"Generating {speaker} segment {n}/{len(lines)}...")
+            audio=job/f"audio_{n}.wav"; voice="af_heart" if speaker=="Emily" else "am_michael"
             make_audio(text,voice,speed,audio)
             lipdir=job/f"lip_{n}"
             active=make_lipsync(audio,EMILY_IMG if speaker=="Emily" else DAVID_IMG,lipdir)
             seg=job/f"segment_{n}.mp4"
             make_segment(active,DAVID_IMG if speaker=="Emily" else EMILY_IMG,audio,speaker,seg)
-            d=duration(seg)
-            clips.append(seg)
+            d=duration(seg); clips.append(seg)
             entries.append({"start":cursor,"end":cursor+d,"text":text,"speaker":speaker})
             cursor+=d+pause
-
-        concat=job/"concat.txt"
-        concat.write_text("\n".join(f"file '{str(c)}'" for c in clips))
+        JOBS[job_id].update(progress=90,message="Joining video and adding captions...")
+        concat=job/"concat.txt"; concat.write_text("\\n".join(f"file '{str(x)}'" for x in clips))
         joined=job/"joined.mp4"
         run(["ffmpeg","-y","-f","concat","-safe","0","-i",str(concat),"-c:v","libx264","-preset","veryfast","-crf","19","-c:a","aac","-b:a","160k",str(joined)])
-        final=job/"English_With_Emily.mp4"
-        add_captions(joined,entries,style,final)
-        return send_file(final,mimetype="video/mp4",as_attachment=True,download_name="English_With_Emily.mp4")
+        final=job/"English_With_Emily.mp4"; add_captions(joined,entries,style,final)
+        JOBS[job_id].update(status="done",progress=100,message="Video ready.",file=str(final))
     except Exception as e:
-        return jsonify({"error":str(e)}),500
+        JOBS[job_id].update(status="error",progress=0,message=str(e),trace=traceback.format_exc())
 
-if __name__=="__main__":
-    app.run(host="0.0.0.0",port=7860,debug=False)
+@app.post("/generate")
+def generate():
+    data=request.get_json(force=True)
+    script=data.get("script","").strip(); mode=data.get("mode","Normal English"); style=data.get("captionStyle","highlight"); fmt=data.get("format","16:9 YouTube")
+    if not script: return jsonify({"error":"Script is empty"}),400
+    lines=[raw for raw in script.splitlines() if re.match(r"^\\s*(Emily|David)\\s*:\\s*.+$",raw,re.I)]
+    if not lines: return jsonify({"error":"Use lines beginning with Emily: or David:"}),400
+    job_id=uuid.uuid4().hex
+    JOBS[job_id]={"status":"queued","progress":0,"message":"Queued..."}
+    threading.Thread(target=run_job,args=(job_id,script,mode,style,fmt),daemon=True).start()
+    return jsonify({"job_id":job_id,"status_url":f"/status/{job_id}"}),202
+
+@app.get("/status/<job_id>")
+def job_status(job_id):
+    job=JOBS.get(job_id)
+    if not job: return jsonify({"error":"Job not found"}),404
+    out={k:v for k,v in job.items() if k!="trace"}
+    if job.get("status")=="done": out["download_url"]=f"/download/{job_id}"
+    return jsonify(out)
+
+@app.get("/download/<job_id>")
+def download_job(job_id):
+    job=JOBS.get(job_id)
+    if not job or job.get("status")!="done": return jsonify({"error":"Video not ready"}),404
+    return send_file(job["file"],mimetype="video/mp4",as_attachment=True,download_name="English_With_Emily.mp4")
+
+
