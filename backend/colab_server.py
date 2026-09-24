@@ -175,7 +175,7 @@ def run_job(job_id, script, mode, style, fmt):
             entries.append({"start":cursor,"end":cursor+d,"text":text,"speaker":speaker})
             cursor+=d+pause
         JOBS[job_id].update(progress=90,message="Joining video and adding captions...")
-        concat=job/"concat.txt"; concat.write_text("\\n".join(f"file '{str(x)}'" for x in clips))
+        concat=job/"concat.txt"; concat.write_text("\n".join(f"file '{str(x)}'" for x in clips))
         joined=job/"joined.mp4"
         run(["ffmpeg","-y","-f","concat","-safe","0","-i",str(concat),"-c:v","libx264","-preset","veryfast","-crf","19","-c:a","aac","-b:a","160k",str(joined)])
         final=job/"English_With_Emily.mp4"; add_captions(joined,entries,style,final)
