@@ -3,253 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>English With Emily - AI Video Maker</title>
-
 <style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    color: #222;
-}
-
-header {
-    background: #222;
-    color: white;
-    padding: 22px;
-    text-align: center;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 28px;
-}
-
-header p {
-    margin: 8px 0 0;
-    color: #ccc;
-}
-
-.container {
-    max-width: 1000px;
-    margin: 30px auto;
-    padding: 20px;
-}
-
-.card {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-}
-
-h2 {
-    margin-top: 0;
-}
-
-.characters {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.character {
-    flex: 1;
-    min-width: 250px;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    padding: 18px;
-}
-
-.character h3 {
-    margin-top: 0;
-}
-
-label {
-    display: block;
-    margin-top: 15px;
-    margin-bottom: 7px;
-    font-weight: bold;
-}
-
-select,
-textarea,
-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 7px;
-    font-size: 15px;
-}
-
-textarea {
-    min-height: 220px;
-    resize: vertical;
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 20px;
-    border: none;
-    border-radius: 8px;
-    background: #222;
-    color: white;
-    font-size: 17px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #444;
-}
-
-.preview {
-    min-height: 250px;
-    border: 2px dashed #ccc;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 30px;
-    color: #777;
-}
-
-.status {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 7px;
-    background: #f0f0f0;
-    display: none;
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#eef4ff,#f8fbff);color:#172033}
+header{background:linear-gradient(135deg,#172554,#2563eb);color:#fff;padding:24px;text-align:center}
+header h1{margin:0;font-size:30px} header p{margin:7px 0 0;opacity:.9}
+.container{max-width:1100px;margin:28px auto;padding:0 18px}
+.card{background:#fff;border-radius:16px;padding:22px;margin-bottom:20px;box-shadow:0 8px 28px rgba(30,60,100,.09);border:1px solid #e6ebf2}
+h2{margin:0 0 16px}
+.characters{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.character{border:1px solid #dbe3ef;border-radius:14px;padding:18px;background:#fbfdff}
+label{display:block;margin:14px 0 7px;font-weight:700}
+select,textarea{width:100%;padding:12px;border:1px solid #ccd6e4;border-radius:9px;font-size:15px;background:#fff}
+textarea{min-height:220px;resize:vertical;line-height:1.55}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+button:hover{background:#1d4ed8}
+.status{margin-top:14px;padding:12px;border-radius:9px;background:#eff6ff;color:#1e40af;display:none}
+.podcast{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#101827,#263a58);display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:24px}
+.podcast:before{content:"ENGLISH WITH EMILY";position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:2px;color:#cbd5e1;font-weight:800}
+.speaker{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;padding:18px;transition:.25s;background:rgba(255,255,255,.07);border:2px solid transparent}
+.speaker.active{transform:scale(1.025);border-color:#60a5fa;background:rgba(59,130,246,.13)}
+.avatar{width:min(170px,30vw);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(145deg,#fff,#dbeafe);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.name{color:#fff;font-weight:800;font-size:20px;margin-top:10px}
+.role{color:#b8c5d8;font-size:12px}
+.caption{position:absolute;bottom:18px;max-width:88%;padding:11px 16px;border-radius:12px;background:rgba(0,0,0,.76);color:#fff;font-size:clamp(15px,2vw,22px);font-weight:800;text-align:center;line-height:1.3}
+.left .caption{left:6%;right:6%}.right .caption{left:6%;right:6%}
+.highlight{color:#5eead4;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+.bubble{border-radius:20px;background:#fff;color:#172033}
+.blue{background:#2563eb}.clean{background:rgba(255,255,255,.14);backdrop-filter:blur(8px)}
+.hint{font-size:13px;color:#64748b;margin:8px 0 0}
+@media(max-width:760px){.characters,.controls{grid-template-columns:1fr}.podcast{padding:12px}.avatar{font-size:42px}.caption{font-size:14px}}
 </style>
 </head>
-
 <body>
-
-<header>
-    <h1>English With Emily</h1>
-    <p>AI Two-Character Video Maker</p>
-</header>
-
+<header><h1>English With Emily</h1><p>AI Two-Character English Learning Video Maker</p></header>
 <div class="container">
-
-    <div class="card">
-        <h2>👩 Character 1 — Emily</h2>
-
-        <label>Character</label>
-        <select id="character1">
-            <option>Emily</option>
-        </select>
-
-        <label>Voice</label>
-        <select id="voice1">
-            <option>Female English Voice</option>
-            <option>Female - Slow English</option>
-            <option>Female - Natural English</option>
-        </select>
-    </div>
-
-    <div class="card">
-        <h2>👨 Character 2 — David</h2>
-
-        <label>Character</label>
-        <select id="character2">
-            <option>David</option>
-        </select>
-
-        <label>Voice</label>
-        <select id="voice2">
-            <option>Male English Voice</option>
-            <option>Male - Slow English</option>
-            <option>Male - Natural English</option>
-        </select>
-    </div>
-
-    <div class="card">
-        <h2>📝 Video Script</h2>
-
-        <p>
-            Write the conversation like this:
-        </p>
-
-        <textarea id="script">Emily: Good morning, David. How are you today?
+<div class="card">
+<h2>🎙️ Podcast Characters</h2>
+<div class="characters">
+<div class="character"><h3>👩 Emily</h3><label>Character</label><select id="character1"><option>Emily</option></select><label>Voice</label><select id="voice1"><option>Female English Voice</option><option>Female - Slow English</option><option>Female - Natural English</option></select></div>
+<div class="character"><h3>👨 David</h3><label>Character</label><select id="character2"><option>David</option></select><label>Voice</label><select id="voice2"><option>Male English Voice</option><option>Male - Slow English</option><option>Male - Natural English</option></select></div>
+</div>
+</div>
+<div class="card">
+<h2>📝 Video Script</h2>
+<p class="hint">Write each line as <b>Emily:</b> or <b>David:</b>. The preview keeps both speakers visible.</p>
+<textarea id="script">Emily: Good morning, David. How are you today?
 
 David: Good morning, Emily. I'm doing great. How about you?
 
 Emily: I'm very good. Today we are going to practice simple English.
 
 David: That sounds great. Let's begin!</textarea>
-
-        <label>Caption Style</label>
-        <select id="captionStyle">
-            <option>Large Easy English</option>
-            <option>Normal Captions</option>
-            <option>Bold Learning Captions</option>
-        </select>
-
-        <label>Video Format</label>
-        <select id="format">
-            <option>16:9 YouTube</option>
-            <option>9:16 YouTube Shorts</option>
-            <option>1:1 Square</option>
-        </select>
-
-        <button onclick="generateVideo()">
-            🎬 Generate AI Video
-        </button>
-
-        <div id="status" class="status"></div>
-    </div>
-
-    <div class="card">
-        <h2>🎥 Video Preview</h2>
-
-        <div class="preview" id="preview">
-            Your generated video will appear here.
-        </div>
-    </div>
-
+<div class="controls">
+<div><label>English Mode</label><select id="mode"><option>Normal English</option><option>Slow English</option><option>Beginner Friendly</option></select></div>
+<div><label>Caption Template</label><select id="captionStyle" onchange="updatePreview()"><option value="highlight">Highlight Word</option><option value="clean">Clean Podcast</option><option value="blue">Blue Highlight</option><option value="beginner">Beginner Focus</option><option value="bubble">Speech Bubble</option></select></div>
+<div><div><label>Video Format</label><select id="format"><option>16:9 YouTube</option><option>9:16 YouTube Shorts</option><option>1:1 Square</option></select></div></div>
+<div><div><label>Caption Behavior</label><select id="captionBehavior"><option>Keep full sentence visible</option><option>Highlight spoken word</option><option>Sentence + word highlight</option></select></div></div>
 </div>
-
+<button onclick="generateVideo()">🎬 Generate AI Video</button>
+<div id="status" class="status"></div>
+</div>
+<div class="card">
+<h2>🎥 Podcast Preview</h2>
+<p class="hint">Both speakers stay visible. The active speaker is emphasized and the full sentence stays on screen while the spoken word is highlighted.</p>
+<div class="podcast">
+<div class="speaker left active"><div class="avatar">👩🏻</div><div class="name">Emily</div><div class="role">English Teacher</div><div id="emilyCaption" class="caption">Good morning, <span class="highlight">David</span>. How are you today?</div></div>
+<div class="speaker right"><div class="avatar">👨🏻</div><div class="name">David</div><div class="role">English Learner</div><div id="davidCaption" class="caption clean">I'm doing great. How about you?</div></div>
+</div>
+</div>
+</div>
 <script>
-
-function generateVideo() {
-
-    const script = document.getElementById("script").value;
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
-
-    if (script.trim() === "") {
-        alert("Please enter a script first.");
-        return;
-    }
-
-    status.style.display = "block";
-    status.innerHTML = "⏳ Preparing your AI video...";
-
-    preview.innerHTML = `
-        <div>
-            <h2>🎬 Video Project Ready</h2>
-            <p>Your script has been received.</p>
-            <p>Next we will connect:</p>
-            <p>🎙️ AI Voice → 👄 Lip Sync → 💬 Captions → 🎥 Video</p>
-        </div>
-    `;
-
-    setTimeout(function() {
-        status.innerHTML =
-            "✅ Prototype working! AI generation will be connected in the next stage.";
-    }, 1200);
+function updatePreview(){
+ const style=document.getElementById('captionStyle').value;
+ document.querySelectorAll('.caption').forEach(c=>c.className='caption');
+ if(style==='clean')document.querySelectorAll('.caption').forEach(c=>c.classList.add('clean'));
+ if(style==='blue')document.querySelectorAll('.caption').forEach(c=>c.classList.add('blue'));
+ if(style==='bubble')document.querySelectorAll('.caption').forEach(c=>c.classList.add('bubble'));
+ if(style==='beginner')document.querySelectorAll('.caption').forEach(c=>c.classList.add('clean'));
 }
-
+function generateVideo(){
+ const script=document.getElementById('script').value, status=document.getElementById('status');
+ if(!script.trim()){alert('Please enter a script first.');return}
+ status.style.display='block';
+ status.innerHTML='⏳ Project prepared: '+document.getElementById('mode').value+' • '+document.getElementById('captionStyle').selectedOptions[0].text;
+ setTimeout(()=>status.innerHTML='✅ Podcast layout ready. Next stage: connect Kokoro voice → SadTalker lip sync → persistent captions → MP4.',900);
+}
+document.getElementById('captionStyle').addEventListener('change',updatePreview);
 </script>
-
 </body>
 </html>
