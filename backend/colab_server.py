@@ -155,7 +155,7 @@ def run_job(job_id, script, mode, style, fmt):
         lines=[]
         for raw in script.splitlines():
             raw=raw.strip()
-            m=re.match(r"^(Emily|David)\\s*:\\s*(.+)$",raw,re.I)
+            m=re.match(r"^(Emily|David)\s*:\s*(.+)$",raw,re.I)
             if m: lines.append((m.group(1).title(),m.group(2).strip()))
         if not lines: raise RuntimeError("Use lines beginning with Emily: or David:")
         job=OUT/job_id; job.mkdir(parents=True,exist_ok=True)
