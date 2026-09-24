@@ -73,16 +73,17 @@ def make_segment(active_video, inactive_image, audio, speaker, out):
       "setsar=1[right];"
       "[left][right]hstack=inputs=2,format=yuv420p[v]"
     )
+    # Only the static portrait input needs looping. Never apply -loop to the SadTalker MP4.
     if speaker=="Emily":
-        inputs=[active_video,inactive_image]
+        cmd=["ffmpeg","-y","-i",str(active_video),"-loop","1","-i",str(inactive_image),"-i",str(audio)]
     else:
-        inputs=[inactive_image,active_video]
-    run([
-      "ffmpeg","-y","-loop","1","-i",str(inputs[0]),"-i",str(inputs[1]),"-i",str(audio),
+        cmd=["ffmpeg","-y","-loop","1","-i",str(inactive_image),"-i",str(active_video),"-i",str(audio)]
+    cmd += [
       "-filter_complex",filt,"-map","[v]","-map","2:a",
       "-t",str(duration(audio)),"-r","25","-c:v","libx264","-preset","veryfast",
       "-crf","20","-c:a","aac","-b:a","160k","-shortest",str(out)
-    ])
+    ]
+    run(cmd)
 
 def add_captions(video, entries, style, out):
     # Keep the full sentence on screen; highlight the currently spoken word.
