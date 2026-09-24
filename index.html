@@ -92,37 +92,29 @@ function updatePreview(){
  if(style==='beginner')document.querySelectorAll('.caption').forEach(c=>c.classList.add('clean'));
 }
 async function generateVideo(){
- const script=document.getElementById('script').value.trim();
- const status=document.getElementById('status');
- const preview=document.getElementById('preview');
+ const script=document.getElementById('script').value.trim(), status=document.getElementById('status'), preview=document.getElementById('preview');
  const api=(document.getElementById('apiUrl').value||'').trim().replace(/\/$/,'');
- if(!script){alert('Please enter a script first.');return}
- if(!api){alert('First paste your Colab Generator URL.');return}
- status.style.display='block';
- status.innerHTML='⏳ Generating real video with Kokoro + SadTalker... This can take a few minutes.';
+ if(!script){alert('Please enter a script first.');return} if(!api){alert('First paste your Colab Generator URL.');return}
+ status.style.display='block'; status.innerHTML='⏳ Starting video generation...';
  try{
-   const res=await fetch(api+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-     script,
-     mode:document.getElementById('mode').value,
-     captionStyle:document.getElementById('captionStyle').value,
-     format:document.getElementById('format').value
-   })});
-   if(!res.ok){
-     const err=await res.json().catch(()=>({error:'Generator error'}));
-     throw new Error(err.error||'Generator error');
+  const res=await fetch(api+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({script,mode:document.getElementById('mode').value,captionStyle:document.getElementById('captionStyle').value,format:document.getElementById('format').value})});
+  if(!res.ok){const err=await res.json().catch(()=>({error:'Generator error'}));throw new Error(err.error||'Generator error')}
+  const job=await res.json(), id=job.job_id; status.innerHTML='⏳ Video generation started...';
+  for(;;){
+   await new Promise(r=>setTimeout(r,3000));
+   const s=await fetch(api+'/status/'+id); if(!s.ok) throw new Error('Status check failed');
+   const data=await s.json();
+   if(data.status==='error') throw new Error(data.message||'Generation failed');
+   status.innerHTML='⏳ '+(data.message||'Generating...')+' '+(data.progress||0)+'%';
+   if(data.status==='done'){
+    const url=api+data.download_url;
+    preview.innerHTML='<video controls autoplay style="width:100%;max-height:620px;border-radius:14px;background:#000"></video><p class="hint">Your real generated MP4 is ready.</p>';
+    preview.querySelector('video').src=url;
+    const a=document.createElement('a'); a.href=url; a.download='English_With_Emily.mp4'; a.textContent='⬇️ Download MP4'; a.style.display='inline-block'; a.style.marginTop='12px'; a.style.fontWeight='800'; preview.appendChild(a);
+    status.innerHTML='✅ Video generated successfully!'; break;
    }
-   const blob=await res.blob();
-   const url=URL.createObjectURL(blob);
-   preview.innerHTML='<video controls autoplay style="width:100%;max-height:620px;border-radius:14px;background:#000"></video><p class="hint">Your real generated MP4 is ready.</p>';
-   preview.querySelector('video').src=url;
-   const a=document.createElement('a');
-   a.href=url;a.download='English_With_Emily.mp4';a.textContent='⬇️ Download MP4';
-   a.style.display='inline-block';a.style.marginTop='12px';a.style.fontWeight='800';
-   preview.appendChild(a);
-   status.innerHTML='✅ Video generated successfully!';
- }catch(e){
-   status.innerHTML='❌ '+e.message;
- }
+  }
+ }catch(e){status.innerHTML='❌ '+e.message}
 }
 document.getElementById('captionStyle').addEventListener('change',updatePreview);
 </script>
