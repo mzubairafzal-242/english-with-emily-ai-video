@@ -188,7 +188,7 @@ def generate():
     data=request.get_json(force=True)
     script=data.get("script","").strip(); mode=data.get("mode","Normal English"); style=data.get("captionStyle","highlight"); fmt=data.get("format","16:9 YouTube")
     if not script: return jsonify({"error":"Script is empty"}),400
-    lines=[raw for raw in script.splitlines() if re.match(r"^\\s*(Emily|David)\\s*:\\s*.+$",raw,re.I)]
+    lines=[raw for raw in script.splitlines() if re.match(r"^\s*(Emily|David)\s*:\s*.+$",raw,re.I)]
     if not lines: return jsonify({"error":"Use lines beginning with Emily: or David:"}),400
     job_id=uuid.uuid4().hex
     JOBS[job_id]={"status":"queued","progress":0,"message":"Queued..."}
@@ -210,3 +210,6 @@ def download_job(job_id):
     return send_file(job["file"],mimetype="video/mp4",as_attachment=True,download_name="English_With_Emily.mp4")
 
 
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=7860, debug=False, threaded=True)
