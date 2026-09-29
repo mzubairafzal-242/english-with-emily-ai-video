@@ -69,6 +69,7 @@ David: That sounds great. Let's begin!</textarea>
 <div><label>Caption Template</label><select id="captionStyle" onchange="updatePreview()"><option value="highlight">Highlight Word</option><option value="clean">Clean Podcast</option><option value="blue">Blue Highlight</option><option value="beginner">Beginner Focus</option><option value="bubble">Speech Bubble</option></select></div>
 <div><div><label>Video Format</label><select id="format"><option>16:9 YouTube</option><option>9:16 YouTube Shorts</option><option>1:1 Square</option></select></div></div>
 <div><div><label>Caption Behavior</label><select id="captionBehavior"><option>Keep full sentence visible</option><option>Highlight spoken word</option><option>Sentence + word highlight</option></select></div></div>
+<div><div><label>Caption Position</label><select id="captionPosition"><option value="bottom">Bottom</option><option value="top">Top</option></select></div></div>
 </div>
 <button onclick="generateVideo()">🎬 Generate AI Video</button>
 <div id="status" class="status"></div>
@@ -97,7 +98,7 @@ async function generateVideo(){
  if(!script){alert('Please enter a script first.');return} if(!api){alert('First paste your Colab Generator URL.');return}
  status.style.display='block'; status.innerHTML='⏳ Starting video generation...';
  try{
-  const res=await fetch(api+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({script,mode:document.getElementById('mode').value,captionStyle:document.getElementById('captionStyle').value,format:document.getElementById('format').value})});
+  const res=await fetch(api+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({script,mode:document.getElementById('mode').value,captionStyle:document.getElementById('captionStyle').value,format:document.getElementById('format').value,captionPosition:document.getElementById('captionPosition').value})});
   if(!res.ok){const err=await res.json().catch(()=>({error:'Generator error'}));throw new Error(err.error||'Generator error')}
   const job=await res.json(), id=job.job_id; status.innerHTML='⏳ Video generation started...';
   for(;;){
@@ -108,10 +109,11 @@ async function generateVideo(){
    status.innerHTML='⏳ '+(data.message||'Generating...')+' '+(data.progress||0)+'%';
    if(data.status==='done'){
     const url=api+data.download_url;
-    preview.innerHTML='<video controls autoplay style="width:100%;max-height:620px;border-radius:14px;background:#000"></video><p class="hint">Your real generated MP4 is ready.</p>';
+    preview.innerHTML='<video controls autoplay style="width:100%;max-height:620px;border-radius:14px;background:#000"></video><p class="hint">Your real generated MP4 is ready and downloading automatically.</p>';
     preview.querySelector('video').src=url;
     const a=document.createElement('a'); a.href=url; a.download='English_With_Emily.mp4'; a.textContent='⬇️ Download MP4'; a.style.display='inline-block'; a.style.marginTop='12px'; a.style.fontWeight='800'; preview.appendChild(a);
-    status.innerHTML='✅ Video generated successfully!'; break;
+    a.click();
+    status.innerHTML='✅ Video generated successfully! Downloading...'; break;
    }
   }
  }catch(e){status.innerHTML='❌ '+e.message}
