@@ -15,22 +15,18 @@ h2{margin:0 0 16px}
 .characters{display:grid;grid-template-columns:1fr;gap:18px}
 .character{border:1px solid #dbe3ef;border-radius:14px;padding:18px;background:#fbfdff}
 label{display:block;margin:14px 0 7px;font-weight:700}
-select,textarea,input[type="file"]{width:100%;padding:12px;border:1px solid #ccd6e4;border-radius:9px;font-size:15px;background:#fff}
-textarea{min-height:160px;resize:vertical;line-height:1.55}
+select,textarea,input[type="file"],input[type="text"]{width:100%;padding:12px;border:1px solid #ccd6e4;border-radius:9px;font-size:15px;background:#fff}
+textarea{min-height:140px;resize:vertical;line-height:1.55}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-size:17px;font-weight:700;cursor:pointer}
 button:hover{background:#1d4ed8}
+.fetch-btn{background:#10b981;margin-top:0;width:160px}
+.fetch-btn:hover{background:#059669}
 .status{margin-top:14px;padding:12px;border-radius:9px;background:#eff6ff;color:#1e40af;display:none}
 .podcast{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#101827,#263a58);display:flex;align-items:center;justify-content:center;padding:24px}
 .podcast:before{content:"EMILY SPORTS REACTION";position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:2px;color:#cbd5e1;font-weight:800}
-.speaker{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;padding:18px;transition:.25s;background:rgba(255,255,255,.07);border:2px solid #60a5fa}
-.avatar{width:min(140px,25vw);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(145deg,#fff,#dbeafe);box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.name{color:#fff;font-weight:800;font-size:18px;margin-top:10px}
-.role{color:#b8c5d8;font-size:12px}
-.caption{position:absolute;bottom:18px;max-width:88%;padding:11px 16px;border-radius:12px;background:rgba(0,0,0,.76);color:#fff;font-size:clamp(15px,2vw,20px);font-weight:800;text-align:center;line-height:1.3}
-.highlight{color:#5eead4;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
 .hint{font-size:13px;color:#64748b;margin:8px 0 0}
-@media(max-width:760px){.characters,.controls{grid-template-columns:1fr}.podcast{padding:12px}.avatar{font-size:36px}}
+@media(max-width:760px){.characters,.controls{grid-template-columns:1fr}.podcast{padding:12px}}
 </style>
 </head>
 <body>
@@ -53,19 +49,32 @@ button:hover{background:#1d4ed8}
 </div>
 </div>
 
-<!-- Upload Sports Video -->
+<!-- Upload or Link Sports Video -->
 <div class="card">
-<h2>⚽ Upload Sports Match Video</h2>
-<p class="hint">Upload the sports video on which Emily will give reactions/commentary.</p>
+<h2>⚽ Sports Match Video (Upload or Link)</h2>
+<p class="hint">Aap ya toh direct video file upload karein, ya phir YouTube / Facebook / Instagram ka link paste karein.</p>
+
+<!-- Option A: Link Downloader -->
+<label>Paste Video Link (YouTube / FB / Insta)</label>
+<div style="display:flex; gap:10px; align-items:center;">
+<input type="text" id="videoUrlInput" placeholder="https://www.youtube.com/watch?v=..." style="flex:1;">
+<button onclick="downloadFromUrl()" class="fetch-btn">📥 Fetch Link</button>
+</div>
+<div id="downloadStatus" class="hint" style="color: #059669; font-weight: bold; display:none; margin-top: 8px;"></div>
+
+<p style="text-align:center; margin:16px 0; font-weight:bold; color:#64748b;">- OR -</p>
+
+<!-- Option B: Direct File Upload -->
+<label>Upload Video File From Device</label>
 <input type="file" id="sportsVideoFile" accept="video/mp4,video/*">
 </div>
 
 <!-- Generator Connection -->
 <div class="card">
 <h2>🔌 Generator Connection</h2>
-<p class="hint">Your Colab or local backend URL running Kokoro TTS + SadTalker + FFmpeg.</p>
+<p class="hint">Apna Kaggle Cloudflare Tunnel URL yahan paste karein.</p>
 <label>Backend Generator URL</label>
-<input id="apiUrl" placeholder="Paste your HTTPS tunnel URL here (e.g. https://xxxx.trycloudflare.com)">
+<input id="apiUrl" placeholder="https://xxxx.trycloudflare.com">
 </div>
 
 <!-- Video Script & Commentary -->
@@ -99,7 +108,7 @@ button:hover{background:#1d4ed8}
 <!-- Live Preview Layout -->
 <div class="card">
 <h2>🎥 Layout Preview (PiP Mode)</h2>
-<p class="hint">Emily's reaction box will stay on top of your sports video.</p>
+<p class="hint">Emily's reaction box will stay on top of your sports match video.</p>
 <div id="preview" class="podcast" style="background: #0f172a; border: 2px dashed #3b82f6;">
 <div style="position: absolute; top: 15px; right: 15px; width: 120px; background: rgba(0,0,0,0.7); border-radius: 10px; padding: 8px; text-align: center; border: 2px solid #60a5fa;">
 <div style="font-size: 28px;">👩🏻</div>
@@ -112,23 +121,57 @@ button:hover{background:#1d4ed8}
 </div>
 
 <script>
+let activeVideoFilename = "";
+
+async function downloadFromUrl() {
+    const url = document.getElementById('videoUrlInput').value.trim();
+    const api = (document.getElementById('apiUrl').value || '').trim().replace(/\/$/, '');
+    const statusDiv = document.getElementById('downloadStatus');
+    
+    if(!url) {alert('Please enter a video URL.'); return;}
+    if(!api) {alert('Please paste your Backend Generator URL first.'); return;}
+    
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = '⏳ Downloading video from link (Please wait)...';
+    
+    try {
+        const res = await fetch(api + '/download-url', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ url: url })
+        });
+        
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Download failed');
+        
+        activeVideoFilename = data.filename;
+        statusDiv.innerHTML = '✅ Video fetched successfully! Ready for reaction generation.';
+    } catch(e) {
+        statusDiv.innerHTML = '❌ Error: ' + e.message;
+    }
+}
+
 async function generateVideo(){
- const script=document.getElementById('script').value.trim();
- const videoFile=document.getElementById('sportsVideoFile').files[0];
- const status=document.getElementById('status');
- const preview=document.getElementById('preview');
- const api=(document.getElementById('apiUrl').value||'').trim().replace(/\/$/,'');
+ const script = document.getElementById('script').value.trim();
+ const videoFile = document.getElementById('sportsVideoFile').files[0];
+ const status = document.getElementById('status');
+ const preview = document.getElementById('preview');
+ const api = (document.getElementById('apiUrl').value || '').trim().replace(/\/$/, '');
 
  if(!script){alert('Please enter a commentary script.');return}
- if(!videoFile){alert('Please select a sports video file to upload.');return}
- if(!api){alert('Please paste your Backend/Colab Generator URL.');return}
+ if(!videoFile && !activeVideoFilename){alert('Please either upload a video file or fetch a video from a link first.');return}
+ if(!api){alert('Please paste your Backend Generator URL.');return}
 
- status.style.display='block'; 
- status.innerHTML='⏳ Uploading sports video & processing reaction...';
+ status.style.display = 'block'; 
+ status.innerHTML = '⏳ Processing reaction video...';
 
  try {
   const formData = new FormData();
-  formData.append('sports_video', videoFile);
+  if (videoFile) {
+      formData.append('sports_video', videoFile);
+  } else if (activeVideoFilename) {
+      formData.append('video_filename', activeVideoFilename);
+  }
   formData.append('script', script);
   formData.append('format', document.getElementById('format').value);
   formData.append('position', document.getElementById('position').value);
@@ -140,7 +183,7 @@ async function generateVideo(){
 
   if(!res.ok){const err=await res.json().catch(()=>({error:'Generator error'}));throw new Error(err.error||'Generator error')}
   const job=await res.json(), id=job.job_id; 
-  status.innerHTML='⏳ Merging Emily reaction with sports video...';
+  status.innerHTML = '⏳ Merging Emily reaction with sports video...';
 
   for(;;){
    await new Promise(r=>setTimeout(r,3000));
@@ -148,7 +191,7 @@ async function generateVideo(){
    if(!s.ok) throw new Error('Status check failed');
    const data = await s.json();
    if(data.status==='error') throw new Error(data.message||'Generation failed');
-   status.innerHTML='⏳ ' + (data.message||'Processing...') + ' ' + (data.progress||0) + '%';
+   status.innerHTML = '⏳ ' + (data.message||'Processing...') + ' ' + (data.progress||0) + '%';
    
    if(data.status==='done'){
     const url = api + data.download_url;
