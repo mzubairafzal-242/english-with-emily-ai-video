@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>English With Emily - AI Video Maker</title>
+<title>Sports Reaction With Emily - AI Video Maker</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#eef4ff,#f8fbff);color:#172033}
@@ -12,113 +12,167 @@ header h1{margin:0;font-size:30px} header p{margin:7px 0 0;opacity:.9}
 .container{max-width:1100px;margin:28px auto;padding:0 18px}
 .card{background:#fff;border-radius:16px;padding:22px;margin-bottom:20px;box-shadow:0 8px 28px rgba(30,60,100,.09);border:1px solid #e6ebf2}
 h2{margin:0 0 16px}
-.characters{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.characters{display:grid;grid-template-columns:1fr;gap:18px}
 .character{border:1px solid #dbe3ef;border-radius:14px;padding:18px;background:#fbfdff}
 label{display:block;margin:14px 0 7px;font-weight:700}
-select,textarea{width:100%;padding:12px;border:1px solid #ccd6e4;border-radius:9px;font-size:15px;background:#fff}
-textarea{min-height:220px;resize:vertical;line-height:1.55}
+select,textarea,input[type="file"]{width:100%;padding:12px;border:1px solid #ccd6e4;border-radius:9px;font-size:15px;background:#fff}
+textarea{min-height:160px;resize:vertical;line-height:1.55}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 button{width:100%;padding:15px;margin-top:20px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-size:17px;font-weight:700;cursor:pointer}
 button:hover{background:#1d4ed8}
 .status{margin-top:14px;padding:12px;border-radius:9px;background:#eff6ff;color:#1e40af;display:none}
-.podcast{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#101827,#263a58);display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:24px}
-.podcast:before{content:"ENGLISH WITH EMILY";position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:2px;color:#cbd5e1;font-weight:800}
-.speaker{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;padding:18px;transition:.25s;background:rgba(255,255,255,.07);border:2px solid transparent}
-.speaker.active{transform:scale(1.025);border-color:#60a5fa;background:rgba(59,130,246,.13)}
-.avatar{width:min(170px,30vw);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(145deg,#fff,#dbeafe);box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.name{color:#fff;font-weight:800;font-size:20px;margin-top:10px}
+.podcast{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:16px;background:linear-gradient(135deg,#101827,#263a58);display:flex;align-items:center;justify-content:center;padding:24px}
+.podcast:before{content:"EMILY SPORTS REACTION";position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:2px;color:#cbd5e1;font-weight:800}
+.speaker{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;padding:18px;transition:.25s;background:rgba(255,255,255,.07);border:2px solid #60a5fa}
+.avatar{width:min(140px,25vw);aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(145deg,#fff,#dbeafe);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.name{color:#fff;font-weight:800;font-size:18px;margin-top:10px}
 .role{color:#b8c5d8;font-size:12px}
-.caption{position:absolute;bottom:18px;max-width:88%;padding:11px 16px;border-radius:12px;background:rgba(0,0,0,.76);color:#fff;font-size:clamp(15px,2vw,22px);font-weight:800;text-align:center;line-height:1.3}
-.left .caption{left:6%;right:6%}.right .caption{left:6%;right:6%}
+.caption{position:absolute;bottom:18px;max-width:88%;padding:11px 16px;border-radius:12px;background:rgba(0,0,0,.76);color:#fff;font-size:clamp(15px,2vw,20px);font-weight:800;text-align:center;line-height:1.3}
 .highlight{color:#5eead4;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
-.bubble{border-radius:20px;background:#fff;color:#172033}
-.blue{background:#2563eb}.clean{background:rgba(255,255,255,.14);backdrop-filter:blur(8px)}
 .hint{font-size:13px;color:#64748b;margin:8px 0 0}
-@media(max-width:760px){.characters,.controls{grid-template-columns:1fr}.podcast{padding:12px}.avatar{font-size:42px}.caption{font-size:14px}}
+@media(max-width:760px){.characters,.controls{grid-template-columns:1fr}.podcast{padding:12px}.avatar{font-size:36px}}
 </style>
 </head>
 <body>
-<header><h1>English With Emily</h1><p>AI Two-Character English Learning Video Maker</p></header>
+<header><h1>English With Emily</h1><p>Sports Reaction & Commentary Video Maker</p></header>
 <div class="container">
+
+<!-- Character Setup -->
 <div class="card">
-<h2>🎙️ Podcast Characters</h2>
+<h2>👩 Emily Reaction Setup</h2>
 <div class="characters">
-<div class="character"><h3>👩 Emily</h3><label>Character</label><select id="character1"><option>Emily</option></select><label>Voice</label><select id="voice1"><option>Female English Voice</option><option>Female - Slow English</option><option>Female - Natural English</option></select></div>
-<div class="character"><h3>👨 David</h3><label>Character</label><select id="character2"><option>David</option></select><label>Voice</label><select id="voice2"><option>Male English Voice</option><option>Male - Slow English</option><option>Male - Natural English</option></select></div>
+<div class="character">
+<h3>Emily (Reaction Host)</h3>
+<label>Voice Style</label>
+<select id="voice1">
+<option>Female English Voice - Energetic</option>
+<option>Female - Slow & Clear</option>
+<option>Female - Excited Sports Tone</option>
+</select>
 </div>
 </div>
+</div>
+
+<!-- Upload Sports Video -->
+<div class="card">
+<h2>⚽ Upload Sports Match Video</h2>
+<p class="hint">Upload the sports video on which Emily will give reactions/commentary.</p>
+<input type="file" id="sportsVideoFile" accept="video/mp4,video/*">
+</div>
+
+<!-- Generator Connection -->
 <div class="card">
 <h2>🔌 Generator Connection</h2>
-<p class="hint">Your GitHub website is the front end. The actual Kokoro + SadTalker generator runs in your Google Colab GPU session.</p>
-<label>Colab Generator URL</label>
-<input id="apiUrl" placeholder="Paste your HTTPS Colab tunnel URL here">
-<p class="hint">Example: https://xxxx.trycloudflare.com</p>
+<p class="hint">Your Colab or local backend URL running Kokoro TTS + SadTalker + FFmpeg.</p>
+<label>Backend Generator URL</label>
+<input id="apiUrl" placeholder="Paste your HTTPS tunnel URL here (e.g. https://xxxx.trycloudflare.com)">
 </div>
+
+<!-- Video Script & Commentary -->
 <div class="card">
-<h2>📝 Video Script</h2>
-<p class="hint">Write each line as <b>Emily:</b> or <b>David:</b>. The preview keeps both speakers visible.</p>
-<textarea id="script">Emily: Good morning, David. How are you today?
+<h2>📝 Emily's Reaction Script / Commentary</h2>
+<p class="hint">Write what Emily will say while reacting to the sports match.</p>
+<textarea id="script">What an unbelievable goal! Look at that curve on the ball, absolutely stunning play!</textarea>
 
-David: Good morning, Emily. I'm doing great. How about you?
-
-Emily: I'm very good. Today we are going to practice simple English.
-
-David: That sounds great. Let's begin!</textarea>
 <div class="controls">
-<div><label>English Mode</label><select id="mode"><option>Normal English</option><option>Slow English</option><option>Beginner Friendly</option></select></div>
-<div><label>Caption Template</label><select id="captionStyle" onchange="updatePreview()"><option value="highlight">Highlight Word</option><option value="clean">Clean Podcast</option><option value="blue">Blue Highlight</option><option value="beginner">Beginner Focus</option><option value="bubble">Speech Bubble</option></select></div>
-<div><div><label>Video Format</label><select id="format"><option>16:9 YouTube</option><option>9:16 YouTube Shorts</option><option>1:1 Square</option></select></div></div>
-<div><div><label>Caption Behavior</label><select id="captionBehavior"><option>Keep full sentence visible</option><option>Highlight spoken word</option><option>Sentence + word highlight</option></select></div></div>
-<div><div><label>Caption Position</label><select id="captionPosition"><option value="bottom">Bottom</option><option value="top">Top</option></select></div></div>
+<div>
+<label>Video Format</label>
+<select id="format">
+<option>16:9 YouTube Match</option>
+<option>9:16 Shorts / Reels</option>
+<option>1:1 Square</option>
+</select>
 </div>
-<button onclick="generateVideo()">🎬 Generate AI Video</button>
+<div>
+<label>Reaction Corner</label>
+<select id="position">
+<option>Top-Right Corner</option>
+<option>Top-Left Corner</option>
+</select>
+</div>
+</div>
+
+<button onclick="generateVideo()">🎬 Generate Sports Reaction Video</button>
 <div id="status" class="status"></div>
 </div>
+
+<!-- Live Preview Layout -->
 <div class="card">
-<h2>🎥 Podcast Preview</h2>
-<p class="hint">Both speakers stay visible. The active speaker is emphasized and the full sentence stays on screen while the spoken word is highlighted.</p>
-<div id="preview" class="podcast">
-<div class="speaker left active"><div class="avatar">👩🏻</div><div class="name">Emily</div><div class="role">English Teacher</div><div id="emilyCaption" class="caption">Good morning, <span class="highlight">David</span>. How are you today?</div></div>
-<div class="speaker right"><div class="avatar">👨🏻</div><div class="name">David</div><div class="role">English Learner</div><div id="davidCaption" class="caption clean">I'm doing great. How about you?</div></div>
+<h2>🎥 Layout Preview (PiP Mode)</h2>
+<p class="hint">Emily's reaction box will stay on top of your sports video.</p>
+<div id="preview" class="podcast" style="background: #0f172a; border: 2px dashed #3b82f6;">
+<div style="position: absolute; top: 15px; right: 15px; width: 120px; background: rgba(0,0,0,0.7); border-radius: 10px; padding: 8px; text-align: center; border: 2px solid #60a5fa;">
+<div style="font-size: 28px;">👩🏻</div>
+<div style="color: #fff; font-size: 11px; font-weight: bold;">Emily (Reaction)</div>
+</div>
+<div style="color: #94a3b8; font-size: 14px; text-align: center;">[ Sports Match Video Background Playing Here ]</div>
 </div>
 </div>
+
 </div>
+
 <script>
-function updatePreview(){
- const style=document.getElementById('captionStyle').value;
- document.querySelectorAll('.caption').forEach(c=>c.className='caption');
- if(style==='clean')document.querySelectorAll('.caption').forEach(c=>c.classList.add('clean'));
- if(style==='blue')document.querySelectorAll('.caption').forEach(c=>c.classList.add('blue'));
- if(style==='bubble')document.querySelectorAll('.caption').forEach(c=>c.classList.add('bubble'));
- if(style==='beginner')document.querySelectorAll('.caption').forEach(c=>c.classList.add('clean'));
-}
 async function generateVideo(){
- const script=document.getElementById('script').value.trim(), status=document.getElementById('status'), preview=document.getElementById('preview');
+ const script=document.getElementById('script').value.trim();
+ const videoFile=document.getElementById('sportsVideoFile').files[0];
+ const status=document.getElementById('status');
+ const preview=document.getElementById('preview');
  const api=(document.getElementById('apiUrl').value||'').trim().replace(/\/$/,'');
- if(!script){alert('Please enter a script first.');return} if(!api){alert('First paste your Colab Generator URL.');return}
- status.style.display='block'; status.innerHTML='⏳ Starting video generation...';
- try{
-  const res=await fetch(api+'/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({script,mode:document.getElementById('mode').value,captionStyle:document.getElementById('captionStyle').value,format:document.getElementById('format').value,captionPosition:document.getElementById('captionPosition').value})});
+
+ if(!script){alert('Please enter a commentary script.');return}
+ if(!videoFile){alert('Please select a sports video file to upload.');return}
+ if(!api){alert('Please paste your Backend/Colab Generator URL.');return}
+
+ status.style.display='block'; 
+ status.innerHTML='⏳ Uploading sports video & processing reaction...';
+
+ try {
+  const formData = new FormData();
+  formData.append('sports_video', videoFile);
+  formData.append('script', script);
+  formData.append('format', document.getElementById('format').value);
+  formData.append('position', document.getElementById('position').value);
+
+  const res = await fetch(api + '/generate-reaction', {
+   method: 'POST',
+   body: formData
+  });
+
   if(!res.ok){const err=await res.json().catch(()=>({error:'Generator error'}));throw new Error(err.error||'Generator error')}
-  const job=await res.json(), id=job.job_id; status.innerHTML='⏳ Video generation started...';
+  const job=await res.json(), id=job.job_id; 
+  status.innerHTML='⏳ Merging Emily reaction with sports video...';
+
   for(;;){
    await new Promise(r=>setTimeout(r,3000));
-   const s=await fetch(api+'/status/'+id); if(!s.ok) throw new Error('Status check failed');
-   const data=await s.json();
+   const s = await fetch(api + '/status/' + id); 
+   if(!s.ok) throw new Error('Status check failed');
+   const data = await s.json();
    if(data.status==='error') throw new Error(data.message||'Generation failed');
-   status.innerHTML='⏳ '+(data.message||'Generating...')+' '+(data.progress||0)+'%';
+   status.innerHTML='⏳ ' + (data.message||'Processing...') + ' ' + (data.progress||0) + '%';
+   
    if(data.status==='done'){
-    const url=api+data.download_url;
-    preview.innerHTML='<video controls autoplay style="width:100%;max-height:620px;border-radius:14px;background:#000"></video><p class="hint">Your real generated MP4 is ready and downloading automatically.</p>';
-    preview.querySelector('video').src=url;
-    const a=document.createElement('a'); a.href=url; a.download='English_With_Emily.mp4'; a.textContent='⬇️ Download MP4'; a.style.display='inline-block'; a.style.marginTop='12px'; a.style.fontWeight='800'; preview.appendChild(a);
+    const url = api + data.download_url;
+    preview.innerHTML = '<video controls autoplay style="width:100%;max-height:400px;border-radius:14px;background:#000"></video><p class="hint">Your final sports reaction video is ready!</p>';
+    preview.querySelector('video').src = url;
+    
+    const a = document.createElement('a'); 
+    a.href = url; 
+    a.download = 'Emily_Sports_Reaction.mp4'; 
+    a.textContent = '⬇️ Download Final Reaction Video'; 
+    a.style.display = 'inline-block'; 
+    a.style.marginTop = '12px'; 
+    a.style.fontWeight = '800'; 
+    preview.appendChild(a);
     a.click();
-    status.innerHTML='✅ Video generated successfully! Downloading...'; break;
+    
+    status.innerHTML = '✅ Video generated successfully! Downloading...'; 
+    break;
    }
   }
- }catch(e){status.innerHTML='❌ '+e.message}
+ } catch(e) {
+  status.innerHTML = '❌ ' + e.message;
+ }
 }
-document.getElementById('captionStyle').addEventListener('change',updatePreview);
 </script>
 </body>
 </html>
